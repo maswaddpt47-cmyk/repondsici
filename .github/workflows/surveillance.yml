@@ -16,7 +16,6 @@ jobs:
         run: |
           curl -fsS --max-time 20 https://repondsici.fr/redirection.js | grep -q 'https://wooclight.alwaysdata.net' \
             || { echo "::error::repondsici.fr ne sert plus la redirection vers WoocLight"; exit 1; }
-          curl -fsS --max-time 20 -o /dev/null https://repondsici.fr/K7M3P -w '%{http_code}\n' || true
           curl -fsSL --max-time 20 -o /dev/null https://www.repondsici.fr/ \
             || { echo "::error::www.repondsici.fr ne répond plus"; exit 1; }
           echo "redirection : OK"
