@@ -17,5 +17,10 @@ par MD-LIB/CLAUDE.md (04/11/2026). Ici, seulement ce qui est propre au projet.
   qui passent par `repondsici.fr` (mineurs compris) ; inscrit au registre de
   WoocLight (`PAPPERBOARD/docs/registre-traitement.md`). Jamais d'outil de
   statistiques, de police ou de script externe ici.
+- **Surveillance** (`.github/workflows/surveillance.yml`, 16/11/2026) : chaque matin,
+  redirection, `www`, WoocLight, certificat (> 14 j) et domaine (> 30 j) ; un échec
+  envoie un mail de GitHub. GitHub suspend une tâche planifiée après 60 jours sans
+  commit dans un dépôt public (il prévient par mail) : la réactiver dans Actions.
+  Ne la présenter comme une surveillance qu'après avoir compté ses passages réels.
 - La regex du code suit `WL_CODE_CHARS` et le `.htaccess` de PAPPERBOARD : les
   changer ensemble.

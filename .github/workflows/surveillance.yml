@@ -1,0 +1,39 @@
+# Chaque matin : repondsici.fr renvoie-t-il toujours vers WoocLight ?
+# Un échec envoie un mail de GitHub au propriétaire du dépôt (réglage par défaut
+# des notifications Actions). Lancement à la main : Actions → surveillance → Run workflow.
+name: surveillance
+on:
+  schedule:
+    - cron: '13 5 * * *'   # 6 h 13 à Paris en hiver, 7 h 13 en été
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    steps:
+      - name: La page de renvoi répond en HTTPS et vise WoocLight
+        run: |
+          curl -fsS --max-time 20 https://repondsici.fr/redirection.js | grep -q 'https://wooclight.alwaysdata.net' \
+            || { echo "::error::repondsici.fr ne sert plus la redirection vers WoocLight"; exit 1; }
+          curl -fsS --max-time 20 -o /dev/null https://repondsici.fr/K7M3P -w '%{http_code}\n' || true
+          curl -fsSL --max-time 20 -o /dev/null https://www.repondsici.fr/ \
+            || { echo "::error::www.repondsici.fr ne répond plus"; exit 1; }
+          echo "redirection : OK"
+      - name: WoocLight répond
+        run: |
+          curl -fsS --max-time 20 -o /dev/null https://wooclight.alwaysdata.net/ \
+            || { echo "::error::wooclight.alwaysdata.net ne répond pas"; exit 1; }
+          echo "WoocLight : OK"
+      - name: Certificat valable plus de 14 jours
+        run: |
+          fin=$(echo | openssl s_client -servername repondsici.fr -connect repondsici.fr:443 2>/dev/null | openssl x509 -noout -enddate | cut -d= -f2)
+          jours=$(( ($(date -d "$fin" +%s) - $(date +%s)) / 86400 ))
+          echo "certificat : $jours jours restants ($fin)"
+          [ "$jours" -gt 14 ] || { echo "::error::certificat de repondsici.fr : $jours jours restants"; exit 1; }
+      - name: Domaine valable plus de 30 jours
+        run: |
+          fin=$(curl -fsS --max-time 20 https://rdap.nic.fr/domain/repondsici.fr | python3 -c 'import json,sys; print(next(e["eventDate"] for e in json.load(sys.stdin)["events"] if e["eventAction"]=="expiration"))')
+          jours=$(( ($(date -d "$fin" +%s) - $(date +%s)) / 86400 ))
+          echo "domaine : $jours jours avant expiration ($fin)"
+          [ "$jours" -gt 30 ] || { echo "::error::repondsici.fr expire dans $jours jours : vérifier le renouvellement chez Alwaysdata"; exit 1; }
