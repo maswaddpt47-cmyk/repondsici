@@ -1,10 +1,12 @@
-# Chaque matin : repondsici.fr renvoie-t-il toujours vers WoocLight ?
+# Deux fois par jour : repondsici.fr renvoie-t-il toujours vers WoocLight ?
 # Un échec envoie un mail de GitHub au propriétaire du dépôt (réglage par défaut
 # des notifications Actions). Lancement à la main : Actions → surveillance → Run workflow.
 name: surveillance
 on:
   schedule:
-    - cron: '13 5 * * *'   # 6 h 13 à Paris en hiver, 7 h 13 en été
+    # Deux créneaux : GitHub saute parfois un passage (créneau de 6 h 13 sauté le 17/11/2026).
+    - cron: '47 4 * * *'   # 5 h 47 à Paris en hiver, 6 h 47 en été
+    - cron: '17 13 * * *'  # 14 h 17 à Paris en hiver, 15 h 17 en été
   workflow_dispatch:
 permissions:
   contents: read
